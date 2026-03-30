@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import MapView from "./MapView";
+import AdminDashboard from "./AdminDashboard";
 
 function App() {
   const [image, setImage] = useState(null);
@@ -33,30 +34,61 @@ function App() {
     }
   };
 
- return (
-  <div style={{ textAlign: "center", marginTop: "50px" }}>
-    <h1>Pothole Reporter 🚧</h1>
+return (
+  <div className="container mt-5">
 
-    <form onSubmit={handleSubmit}>
-      <input
-        type="file"
-        onChange={(e) => setImage(e.target.files[0])}
-      />
-      <br /><br />
+    <h1 className="text-center mb-4">🚧 Smart Pothole Reporter</h1>
 
-      <button type="button" onClick={getLocation}>
-        Get Location 📍
-      </button>
+    <div className="row">
+      
+      {/* LEFT: FORM */}
+      <div className="col-md-5">
+        <div className="card p-4 shadow">
+          <h4 className="mb-3">Report Pothole</h4>
 
-      <p>Lat: {location.lat}</p>
-      <p>Lng: {location.lng}</p>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="file"
+              className="form-control mb-3"
+              onChange={(e) => setImage(e.target.files[0])}
+            />
 
-      <button type="submit">Submit</button>
-    </form>
+            <button
+              type="button"
+              className="btn btn-secondary w-100 mb-3"
+              onClick={getLocation}
+            >
+              Get Location 📍
+            </button>
 
-    {/* ✅ ADD THIS PART */}
-    <h2 style={{ marginTop: "40px" }}>Live Pothole Map 🗺</h2>
-    <MapView />
+            <p><b>Lat:</b> {location.lat}</p>
+            <p><b>Lng:</b> {location.lng}</p>
+
+            <button className="btn btn-primary w-100">
+              Submit Report
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* RIGHT: MAP */}
+      <div className="col-md-7">
+        <div className="card p-3 shadow">
+          <h5 className="text-center">Live Map 🗺</h5>
+          <MapView />
+        </div>
+      </div>
+
+    </div>
+
+    {/* ADMIN SECTION */}
+    <div className="mt-5">
+      <div className="card p-4 shadow">
+        <h4 className="mb-3 text-center">Admin Dashboard 👨‍💻</h4>
+        <AdminDashboard />
+      </div>
+    </div>
+
   </div>
 );
 }
