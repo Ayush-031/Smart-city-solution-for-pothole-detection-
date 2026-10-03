@@ -1,5 +1,23 @@
+
+# Dependencies
 node_modules/
+**/node_modules/
+
+# Environment variables and secrets
 .env
-dist/
+.env.*
+!.env.example
+**/.env
+**/.env.*
+
+# Build files
 build/
-uploads/
+dist/
+
+# Uploaded pothole images
+Server/uploads/*
+!Server/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*

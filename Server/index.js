@@ -4,7 +4,6 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 
 dotenv.config();
-
 const app = express();
 
 // Middleware
@@ -14,6 +13,8 @@ app.use("/uploads", express.static("uploads"));
 
 // Routes
 const potholeRoutes = require("./routes/potholeRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api/admin", adminRoutes);
 app.use("/api/potholes", potholeRoutes);
 
 // MongoDB connection

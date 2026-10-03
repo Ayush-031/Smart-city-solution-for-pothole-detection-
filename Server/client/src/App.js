@@ -1,96 +1,719 @@
 import React, { useState } from "react";
 import axios from "axios";
+
+import {
+  Routes,
+  Route,
+  Link,
+  Navigate
+} from "react-router-dom";
+
 import MapView from "./MapView";
 import AdminDashboard from "./AdminDashboard";
+import AdminLogin from "./AdminLogin";
+import StatusTracker from "./StatusTracker";
 
-function App() {
+import "./App.css";
+
+
+// ========================================
+// USER HOME PAGE
+// ========================================
+
+function UserHome() {
+
   const [image, setImage] = useState(null);
-  const [location, setLocation] = useState({ lat: "", lng: "" });
 
-  // Get location
+  const [location, setLocation] = useState({
+    lat: "",
+    lng: ""
+  });
+
+
+  // ========================================
+  // GET GPS LOCATION
+  // ========================================
+
   const getLocation = () => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setLocation({
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
-      });
-    });
+
+    if (!navigator.geolocation) {
+
+      alert(
+        "Geolocation is not supported by your browser."
+      );
+
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+      (pos) => {
+
+        setLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        });
+
+      },
+
+      (error) => {
+
+        console.log(error);
+
+        alert(
+          "Unable to get your location. Please allow location access."
+        );
+
+      }
+
+    );
+
   };
 
-  // Submit form
+
+  // ========================================
+  // SUBMIT POTHOLE REPORT
+  // ========================================
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
+
+    // Check image
+
+    if (!image) {
+
+      alert(
+        "Please select a pothole image."
+      );
+
+      return;
+    }
+
+
+    // Check location
+
+    if (!location.lat || !location.lng) {
+
+      alert(
+        "Please get your location first."
+      );
+
+      return;
+    }
+
+
+    // Create form data
+
     const formData = new FormData();
-    formData.append("image", image);
-    formData.append("lat", location.lat);
-    formData.append("lng", location.lng);
+
+    formData.append(
+      "image",
+      image
+    );
+
+    formData.append(
+      "lat",
+      location.lat
+    );
+
+    formData.append(
+      "lng",
+      location.lng
+    );
+
 
     try {
-      await axios.post("http://localhost:5000/api/potholes", formData);
-      alert("Pothole Reported ✅");
+
+      const response = await axios.post(
+        "http://localhost:5000/api/potholes",
+        formData
+      );
+
+
+      // Show Report ID
+
+      alert(
+  "Pothole Reported Successfully! ✅\n\n" +
+  "Report ID: " +
+  response.data.reportId +
+  "\n\nSave this ID to track your report."
+);
+
+
+      // Reset form
+
+      setImage(null);
+
+      setLocation({
+        lat: "",
+        lng: ""
+      });
+
+      e.target.reset();
+
+
     } catch (err) {
-      console.log(err);
+
+      console.error(
+        "Submit error:",
+        err
+      );
+
+      alert(
+        "Failed to submit: " +
+        (
+          err.response?.data?.error ||
+          err.message
+        )
+      );
+
     }
+
   };
 
-return (
-  <div className="container mt-5">
 
-    <h1 className="text-center mb-4">🚧 Smart Pothole Reporter</h1>
+  return (
 
-    <div className="row">
-      
-      {/* LEFT: FORM */}
-      <div className="col-md-5">
-        <div className="card p-4 shadow">
-          <h4 className="mb-3">Report Pothole</h4>
+    <div className="app">
 
-          <form onSubmit={handleSubmit}>
-            <input
-              type="file"
-              className="form-control mb-3"
-              onChange={(e) => setImage(e.target.files[0])}
-            />
 
-            <button
-              type="button"
-              className="btn btn-secondary w-100 mb-3"
-              onClick={getLocation}
+      {/* ================================= */}
+      {/* NAVBAR */}
+      {/* ================================= */}
+
+      <nav className="top-navbar">
+
+        <div className="navbar-inner">
+
+          <Link
+            to="/"
+            className="brand"
+          >
+
+            <span className="brand-icon">
+              🚧
+            </span>
+
+            <span>
+              Smart City
+            </span>
+
+          </Link>
+
+
+          <Link
+            to="/admin/login"
+            className="admin-login-btn"
+          >
+            Admin Login
+          </Link>
+
+        </div>
+
+      </nav>
+
+
+      {/* ================================= */}
+      {/* MAIN CONTENT */}
+      {/* ================================= */}
+
+      <main className="main-container">
+
+
+        {/* ================================= */}
+        {/* HERO */}
+        {/* ================================= */}
+
+        <section className="hero">
+
+          <h1>
+
+            Smart{" "}
+
+            <span>
+              Pothole
+            </span>{" "}
+
+            Reporter
+
+          </h1>
+
+
+          <p>
+            Report potholes in your city and help
+            make roads safer for everyone.
+          </p>
+
+        </section>
+
+
+        {/* ================================= */}
+        {/* REPORT + MAP */}
+        {/* ================================= */}
+
+        <section className="main-grid">
+
+
+          {/* ================================= */}
+          {/* REPORT CARD */}
+          {/* ================================= */}
+
+          <div className="card report-card">
+
+
+            <div className="card-heading">
+
+              <div className="heading-icon blue-icon">
+                📷
+              </div>
+
+
+              <div>
+
+                <h2>
+                  Report a Pothole
+                </h2>
+
+
+                <p>
+                  Upload an image and share the
+                  location of the pothole.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <form
+              onSubmit={handleSubmit}
             >
-              Get Location 📍
-            </button>
 
-            <p><b>Lat:</b> {location.lat}</p>
-            <p><b>Lng:</b> {location.lng}</p>
 
-            <button className="btn btn-primary w-100">
-              Submit Report
-            </button>
-          </form>
-        </div>
-      </div>
+              {/* IMAGE */}
 
-      {/* RIGHT: MAP */}
-      <div className="col-md-7">
-        <div className="card p-3 shadow">
-          <h5 className="text-center">Live Map 🗺</h5>
-          <MapView />
-        </div>
-      </div>
+              <div className="form-group">
+
+                <label>
+                  Pothole Image
+                </label>
+
+
+                <div className="file-input-wrapper">
+
+                  <span className="file-icon">
+                    🖼️
+                  </span>
+
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setImage(
+                        e.target.files[0]
+                      )
+                    }
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* LOCATION BUTTON */}
+
+              <button
+                type="button"
+                className="location-btn"
+                onClick={getLocation}
+              >
+
+                📍 Get My Location
+
+              </button>
+
+
+              {/* COORDINATES */}
+
+              <div className="coordinates">
+
+
+                {/* LATITUDE */}
+
+                <div className="coordinate-box">
+
+                  <span className="coordinate-icon blue">
+                    📍
+                  </span>
+
+
+                  <div>
+
+                    <small>
+                      Latitude
+                    </small>
+
+
+                    <strong>
+
+                      {location.lat ||
+                        "Not selected"}
+
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                {/* LONGITUDE */}
+
+                <div className="coordinate-box">
+
+                  <span className="coordinate-icon green">
+                    📍
+                  </span>
+
+
+                  <div>
+
+                    <small>
+                      Longitude
+                    </small>
+
+
+                    <strong>
+
+                      {location.lng ||
+                        "Not selected"}
+
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {/* SUBMIT */}
+
+              <button
+                type="submit"
+                className="submit-btn"
+              >
+
+                ➤ Submit Report
+
+              </button>
+
+            </form>
+
+          </div>
+
+
+          {/* ================================= */}
+          {/* MAP CARD */}
+          {/* ================================= */}
+
+          <div className="card map-card">
+
+
+            <div className="card-heading">
+
+              <div className="heading-icon green-icon">
+                🗺️
+              </div>
+
+
+              <div>
+
+                <h2>
+                  Live Pothole Map
+                </h2>
+
+
+                <p>
+                  View reported potholes across the city.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div className="map-wrapper">
+
+              <MapView />
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* ================================= */}
+        {/* TRACK REPORT */}
+        {/* ================================= */}
+
+        <StatusTracker />
+
+
+        {/* ================================= */}
+        {/* HOW IT WORKS */}
+        {/* ================================= */}
+
+        <section className="card how-card">
+
+
+          <div className="how-title">
+
+            <div className="heading-icon yellow-icon">
+              📋
+            </div>
+
+
+            <h2>
+              How it works
+            </h2>
+
+          </div>
+
+
+          <div className="steps">
+
+
+            {/* STEP 1 */}
+
+            <div className="step">
+
+              <div className="step-number blue">
+                1
+              </div>
+
+
+              <p>
+
+                Upload a pothole
+                <br />
+                image
+
+              </p>
+
+            </div>
+
+
+            <div className="arrow">
+              →
+            </div>
+
+
+            {/* STEP 2 */}
+
+            <div className="step">
+
+              <div className="step-number green">
+                2
+              </div>
+
+
+              <p>
+
+                Allow location
+                <br />
+                access
+
+              </p>
+
+            </div>
+
+
+            <div className="arrow">
+              →
+            </div>
+
+
+            {/* STEP 3 */}
+
+            <div className="step">
+
+              <div className="step-number purple">
+                3
+              </div>
+
+
+              <p>
+
+                Submit your
+                <br />
+                report
+
+              </p>
+
+            </div>
+
+
+            <div className="arrow">
+              →
+            </div>
+
+
+            {/* STEP 4 */}
+
+            <div className="step">
+
+              <div className="step-number orange">
+                4
+              </div>
+
+
+              <p>
+
+                Save the Report ID
+                <br />
+                shown after submission
+
+              </p>
+
+            </div>
+
+
+            <div className="arrow">
+              →
+            </div>
+
+
+            {/* STEP 5 */}
+
+            <div className="step">
+
+              <div className="step-number red">
+                5
+              </div>
+
+
+              <p>
+
+                Use the Report ID
+                <br />
+                to track its status
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+      </main>
 
     </div>
 
-    {/* ADMIN SECTION */}
-    <div className="mt-5">
-      <div className="card p-4 shadow">
-        <h4 className="mb-3 text-center">Admin Dashboard 👨‍💻</h4>
-        <AdminDashboard />
-      </div>
-    </div>
+  );
 
-  </div>
-);
 }
+
+
+// ========================================
+// PROTECTED ADMIN
+// ========================================
+
+function ProtectedAdmin() {
+
+  const token =
+    localStorage.getItem(
+      "adminToken"
+    );
+
+
+  if (!token) {
+
+    return (
+
+      <Navigate
+        to="/admin/login"
+        replace
+      />
+
+    );
+
+  }
+
+
+  return (
+    <AdminDashboard />
+  );
+
+}
+
+
+// ========================================
+// APP ROUTES
+// ========================================
+
+function App() {
+
+  return (
+
+    <Routes>
+
+
+      {/* USER HOME */}
+
+      <Route
+        path="/"
+        element={
+          <UserHome />
+        }
+      />
+
+
+      {/* ADMIN LOGIN */}
+
+      <Route
+        path="/admin/login"
+        element={
+          <AdminLogin />
+        }
+      />
+
+
+      {/* ADMIN DASHBOARD */}
+
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedAdmin />
+        }
+      />
+
+
+      {/* UNKNOWN URL */}
+
+      <Route
+        path="*"
+        element={
+
+          <Navigate
+            to="/"
+            replace
+          />
+
+        }
+      />
+
+
+    </Routes>
+
+  );
+
+}
+
 
 export default App;
