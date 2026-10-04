@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const potholeSchema = new mongoose.Schema({
 
-  // User-friendly Report ID
   reportId: {
     type: String,
     unique: true,
@@ -26,6 +25,12 @@ const potholeSchema = new mongoose.Schema({
     default: "Reported"
   },
 
+  // Time when pothole was marked Fixed
+  fixedAt: {
+    type: Date,
+    default: null
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
@@ -33,7 +38,4 @@ const potholeSchema = new mongoose.Schema({
 
 });
 
-module.exports = mongoose.model(
-  "Pothole",
-  potholeSchema
-);
+module.exports = mongoose.model("Pothole", potholeSchema);

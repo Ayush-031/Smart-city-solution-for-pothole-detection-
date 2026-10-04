@@ -5,7 +5,16 @@ import React, {
 } from "react";
 
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+
+import {
+  Link,
+  useNavigate
+} from "react-router-dom";
+
+import AdminMap from "./AdminMap";
+
+import "./App.css";
+
 
 function AdminDashboard() {
 
@@ -14,11 +23,12 @@ function AdminDashboard() {
 
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("adminToken");
+  const token =
+    localStorage.getItem("adminToken");
 
 
   // ========================================
-  // FETCH ALL REPORTS
+  // FETCH REPORTS
   // ========================================
 
   const fetchData = useCallback(async () => {
@@ -40,11 +50,16 @@ function AdminDashboard() {
 
     } catch (err) {
 
-      console.error("Dashboard error:", err);
+      console.error(
+        "Dashboard error:",
+        err
+      );
 
       if (err.response?.status === 401) {
 
-        localStorage.removeItem("adminToken");
+        localStorage.removeItem(
+          "adminToken"
+        );
 
         navigate("/admin/login");
 
@@ -52,7 +67,7 @@ function AdminDashboard() {
 
         alert(
           err.response?.data?.error ||
-          "Unable to load reports."
+          "Unable to load dashboard data."
         );
 
       }
@@ -67,63 +82,23 @@ function AdminDashboard() {
 
 
   // ========================================
-  // LOAD REPORTS WHEN DASHBOARD OPENS
+  // LOAD DATA
   // ========================================
 
   useEffect(() => {
 
     fetchData();
 
+    // Refresh dashboard every 5 seconds
+    const interval = setInterval(
+      fetchData,
+      5000
+    );
+
+    return () =>
+      clearInterval(interval);
+
   }, [fetchData]);
-
-
-  // ========================================
-  // UPDATE REPORT STATUS
-  // ========================================
-
-  const updateStatus = async (id, status) => {
-
-    try {
-
-      await axios.put(
-        `http://localhost:5000/api/potholes/${id}`,
-        {
-          status
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      // Reload reports after updating
-      await fetchData();
-
-    } catch (err) {
-
-      console.error(
-        "Status update error:",
-        err
-      );
-
-      if (err.response?.status === 401) {
-
-        localStorage.removeItem("adminToken");
-
-        navigate("/admin/login");
-
-        return;
-      }
-
-      alert(
-        err.response?.data?.error ||
-        "Unable to update status."
-      );
-
-    }
-
-  };
 
 
   // ========================================
@@ -132,7 +107,9 @@ function AdminDashboard() {
 
   const logout = () => {
 
-    localStorage.removeItem("adminToken");
+    localStorage.removeItem(
+      "adminToken"
+    );
 
     navigate("/admin/login");
 
@@ -143,60 +120,30 @@ function AdminDashboard() {
   // STATISTICS
   // ========================================
 
-  const total = potholes.length;
+  const total =
+    potholes.length;
 
-  const reported = potholes.filter(
-    (p) => p.status === "Reported"
-  ).length;
+  const reported =
+    potholes.filter(
+      (p) =>
+        p.status === "Reported"
+    ).length;
 
-  const inProgress = potholes.filter(
-    (p) => p.status === "In Progress"
-  ).length;
+  const inProgress =
+    potholes.filter(
+      (p) =>
+        p.status === "In Progress"
+    ).length;
 
-  const fixed = potholes.filter(
-    (p) => p.status === "Fixed"
-  ).length;
-
-
-  // ========================================
-  // IMAGE URL
-  // ========================================
-
-  const getImageUrl = (image) => {
-
-    if (!image) {
-      return "";
-    }
-
-    // Windows paths may contain "\"
-    const cleanPath = image.replace(/\\/g, "/");
-
-    return `http://localhost:5000/${cleanPath}`;
-
-  };
+  const fixed =
+    potholes.filter(
+      (p) =>
+        p.status === "Fixed"
+    ).length;
 
 
   // ========================================
-  // STATUS CLASS
-  // ========================================
-
-  const getStatusClass = (status) => {
-
-    if (status === "Fixed") {
-      return "fixed";
-    }
-
-    if (status === "In Progress") {
-      return "in-progress";
-    }
-
-    return "reported";
-
-  };
-
-
-  // ========================================
-  // DASHBOARD UI
+  // UI
   // ========================================
 
   return (
@@ -204,9 +151,9 @@ function AdminDashboard() {
     <div className="admin-page">
 
 
-      {/* ====================================
-          ADMIN NAVBAR
-      ==================================== */}
+      {/* ==================================
+          NAVBAR
+      ================================== */}
 
       <nav className="admin-navbar">
 
@@ -217,9 +164,7 @@ function AdminDashboard() {
 
           <div className="admin-brand">
 
-            <span>
-              🚧
-            </span>
+            <span>🚧</span>
 
             <div>
 
@@ -236,6 +181,27 @@ function AdminDashboard() {
           </div>
 
 
+          {/* NAVIGATION */}
+
+          <div className="admin-nav-links">
+
+            <Link
+              to="/admin/dashboard"
+              className="admin-nav-link active"
+            >
+              Dashboard
+            </Link>
+
+            <Link
+              to="/admin/reports"
+              className="admin-nav-link"
+            >
+              Pothole Reports
+            </Link>
+
+          </div>
+
+
           {/* LOGOUT */}
 
           <button
@@ -245,15 +211,14 @@ function AdminDashboard() {
             Logout
           </button>
 
-
         </div>
 
       </nav>
 
 
-      {/* ====================================
+      {/* ==================================
           MAIN CONTENT
-      ==================================== */}
+      ================================== */}
 
       <main className="admin-container">
 
@@ -271,7 +236,8 @@ function AdminDashboard() {
             </h1>
 
             <p>
-              Monitor and manage pothole reports.
+              Monitor pothole reports
+              across the city.
             </p>
 
           </div>
@@ -280,8 +246,13 @@ function AdminDashboard() {
           <button
             className="refresh-btn"
             onClick={fetchData}
+            disabled={loading}
           >
-            ↻ Refresh
+
+            {loading
+              ? "↻ Loading..."
+              : "↻ Refresh"}
+
           </button>
 
         </div>
@@ -390,269 +361,152 @@ function AdminDashboard() {
 
 
         {/* ==================================
-            REPORTS SECTION
+            LIVE POTHOLE MAP
         ================================== */}
 
-        <div className="reports-section">
+        <section className="card admin-map-card">
 
 
-          {/* REPORT HEADER */}
+          <div className="card-heading">
 
-          <div className="reports-title">
+            <div className="heading-icon green-icon">
+              🗺️
+            </div>
 
-            <h2>
-              Pothole Reports
-            </h2>
+            <div>
 
-            <span>
-              {total} {total === 1 ? "report" : "reports"}
-            </span>
+              <h2>
+                Live Pothole Map
+              </h2>
+
+              <p>
+                Monitor all reported potholes
+                across the city.
+              </p>
+
+            </div>
 
           </div>
 
 
-          {/* ==================================
-              LOADING
-          ================================== */}
+          <AdminMap />
 
-          {loading ? (
 
-            <div className="empty-dashboard">
+          {/* MAP LEGEND */}
 
-              <div>
-                ⏳
-              </div>
+          <div className="dashboard-map-legend">
+
+            <div>
+
+              <span className="legend-dot reported"></span>
+
+              Reported
+
+            </div>
+
+
+            <div>
+
+              <span className="legend-dot progress"></span>
+
+              In Progress
+
+            </div>
+
+
+            <div>
+
+              <span className="legend-dot fixed"></span>
+
+              Fixed
+
+            </div>
+
+          </div>
+
+
+        </section>
+
+
+        {/* ==================================
+            QUICK INFORMATION
+        ================================== */}
+
+        <section className="dashboard-info-grid">
+
+
+          <div className="dashboard-info-card">
+
+            <div className="info-icon">
+              📊
+            </div>
+
+            <div>
 
               <h3>
-                Loading reports...
+                {total}
               </h3>
 
               <p>
-                Please wait while reports are loaded.
+                Total pothole reports
               </p>
 
             </div>
 
-          ) : potholes.length === 0 ? (
+          </div>
 
 
-            /* ==================================
-               NO REPORTS
-            ================================== */
+          <div className="dashboard-info-card">
 
-            <div className="empty-dashboard">
+            <div className="info-icon">
+              🚧
+            </div>
 
-              <div>
-                📭
-              </div>
+            <div>
 
               <h3>
-                No reports yet
+                {reported + inProgress}
               </h3>
 
               <p>
-                New pothole reports will appear here.
+                Active potholes
               </p>
 
             </div>
 
-          ) : (
+          </div>
 
 
-            /* ==================================
-               REPORT CARDS
-            ================================== */
+          <div className="dashboard-info-card">
 
-            <div className="reports-grid">
+            <div className="info-icon">
+              ✅
+            </div>
 
-              {potholes.map((pothole) => (
+            <div>
 
-                <div
-                  className="report-card-admin"
-                  key={pothole._id}
-                >
+              <h3>
+                {fixed}
+              </h3>
 
-
-                  {/* ============================
-                      IMAGE
-                  ============================ */}
-
-                  <div className="report-image">
-
-                    {pothole.image ? (
-
-                      <img
-                        src={getImageUrl(
-                          pothole.image
-                        )}
-                        alt="Reported pothole"
-                      />
-
-                    ) : (
-
-                      <div className="no-image">
-                        No Image
-                      </div>
-
-                    )}
-
-
-                    {/* STATUS BADGE */}
-
-                    <span
-                      className={`status-badge ${getStatusClass(
-                        pothole.status
-                      )}`}
-                    >
-                      {pothole.status}
-                    </span>
-
-                  </div>
-
-
-                  {/* ============================
-                      DETAILS
-                  ============================ */}
-
-                  <div className="report-details">
-
-
-                    {/* REPORT ID */}
-
-                    <div className="report-id">
-
-                      <span>
-                        Report ID
-                      </span>
-
-                      <strong
-                        title={pothole._id}
-                      >
-                        {pothole._id}
-                      </strong>
-
-                    </div>
-
-
-                    {/* SEVERITY + LOCATION */}
-
-                    <div className="report-info">
-
-
-                      <div>
-
-                        <small>
-                          Severity
-                        </small>
-
-                        <strong>
-                          {pothole.severity}
-                        </strong>
-
-                      </div>
-
-
-                      <div>
-
-                        <small>
-                          Location
-                        </small>
-
-                        <strong>
-
-                          {Number(
-                            pothole.location?.lat
-                          ).toFixed(4)}
-
-                          {" , "}
-
-                          {Number(
-                            pothole.location?.lng
-                          ).toFixed(4)}
-
-                        </strong>
-
-                      </div>
-
-
-                    </div>
-
-
-                    {/* DATE */}
-
-                    <div className="report-date">
-
-                      Reported:{" "}
-
-                      {pothole.createdAt
-                        ? new Date(
-                            pothole.createdAt
-                          ).toLocaleString()
-                        : "Unknown"}
-
-                    </div>
-
-
-                    {/* ============================
-                        ACTION BUTTONS
-                    ============================ */}
-
-                    <div className="status-actions">
-
-
-                      <button
-                        className="progress-btn"
-                        disabled={
-                          pothole.status ===
-                          "In Progress"
-                        }
-                        onClick={() =>
-                          updateStatus(
-                            pothole._id,
-                            "In Progress"
-                          )
-                        }
-                      >
-                        🔧 In Progress
-                      </button>
-
-
-                      <button
-                        className="fixed-btn"
-                        disabled={
-                          pothole.status ===
-                          "Fixed"
-                        }
-                        onClick={() =>
-                          updateStatus(
-                            pothole._id,
-                            "Fixed"
-                          )
-                        }
-                      >
-                        ✓ Mark Fixed
-                      </button>
-
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              ))}
+              <p>
+                Successfully fixed
+              </p>
 
             </div>
 
-          )}
+          </div>
 
-        </div>
+
+        </section>
+
 
       </main>
 
     </div>
 
   );
+
 }
 
 export default AdminDashboard;

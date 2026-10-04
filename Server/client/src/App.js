@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
 import axios from "axios";
-
+import AdminReports from "./AdminReports";
 import {
   Routes,
   Route,
@@ -447,7 +448,7 @@ function UserHome() {
 
             <div className="map-wrapper">
 
-              <MapView />
+              <MapView userLocation={location} />
 
             </div>
 
@@ -652,6 +653,22 @@ function ProtectedAdmin() {
 
 }
 
+function ProtectedReports() {
+
+  const token =
+    localStorage.getItem("adminToken");
+
+  if (!token) {
+    return (
+      <Navigate
+        to="/admin/login"
+        replace
+      />
+    );
+  }
+
+  return <AdminReports />;
+}
 
 // ========================================
 // APP ROUTES
@@ -707,6 +724,10 @@ function App() {
 
         }
       />
+      <Route
+  path="/admin/reports"
+  element={<ProtectedReports />}
+/>
 
 
     </Routes>

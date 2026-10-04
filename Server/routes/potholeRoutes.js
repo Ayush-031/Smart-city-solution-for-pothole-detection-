@@ -218,7 +218,6 @@ router.get(
 
 router.get(
   "/",
-  auth,
   async (req, res) => {
 
     try {
@@ -248,6 +247,11 @@ router.get(
 // ADMIN ONLY
 // ========================================
 
+// ========================================
+// UPDATE STATUS
+// ADMIN ONLY
+// ========================================
+
 router.put(
   "/:id",
   auth,
@@ -255,10 +259,7 @@ router.put(
 
     try {
 
-      const {
-        status
-      } = req.body;
-
+      const { status } = req.body;
 
       const allowedStatuses = [
         "Reported",
@@ -266,10 +267,7 @@ router.put(
         "Fixed"
       ];
 
-
-      if (
-        !allowedStatuses.includes(status)
-      ) {
+      if (!allowedStatuses.includes(status)) {
 
         return res.status(400).json({
           error: "Invalid status"
@@ -277,22 +275,31 @@ router.put(
 
       }
 
+      const updateData = {
+        status
+      };
+
+      // If marked Fixed, save the current time
+      if (status === "Fixed") {
+
+        updateData.fixedAt = new Date();
+
+      } else {
+
+        // If moved back from Fixed,
+        // remove fixed time
+        updateData.fixedAt = null;
+
+      }
 
       const updated =
         await Pothole.findByIdAndUpdate(
-
           req.params.id,
-
-          {
-            status
-          },
-
+          updateData,
           {
             new: true
           }
-
         );
-
 
       if (!updated) {
 
@@ -302,9 +309,7 @@ router.put(
 
       }
 
-
       res.json(updated);
-
 
     } catch (err) {
 
