@@ -15,8 +15,8 @@ build/
 dist/
 
 # Uploaded pothole images
-Server/uploads/*
-!Server/uploads/.gitkeep
+uploads/*
+
 
 # Logs
 *.log
