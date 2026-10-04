@@ -10,31 +10,23 @@ import {
   Link,
   useNavigate
 } from "react-router-dom";
-
 import AdminMap from "./AdminMap";
-
 import "./App.css";
-
-
 function AdminDashboard() {
 
   const [potholes, setPotholes] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
 
-  const token =
-    localStorage.getItem("adminToken");
+  const token = localStorage.getItem("adminToken");
 
 
-  // ========================================
   // FETCH REPORTS
-  // ========================================
+
 
   const fetchData = useCallback(async () => {
 
     try {
-
       setLoading(true);
 
       const response = await axios.get(
