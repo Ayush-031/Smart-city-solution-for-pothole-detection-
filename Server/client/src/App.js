@@ -52,8 +52,7 @@ function UserHome() {
         formData
       );
 
-      alert("Pothole Reported Successfully! ✅\n\n" +"Report ID: " + response.data.reportId + "\n\nSave this ID to track your report." );
-
+alert(`Pothole Reported Successfully!Report ID: ${response.data.reportId}Save this ID to track your report.`);
       setImage(null);
       setLocation({ lat: "", lng: "" });
 
