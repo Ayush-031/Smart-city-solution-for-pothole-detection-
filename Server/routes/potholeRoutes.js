@@ -1,95 +1,69 @@
 const express = require("express");
-const router = express.Router();
 const multer = require("multer");
-const Pothole = require("../models/pothole");
-const mongoose = require("mongoose");
 const crypto = require("crypto");
+const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+const Pothole = require("../models/pothole");
 const auth = require("../middleware/auth");
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+const router = express.Router();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "smart-city-potholes",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"]
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage
+});
 
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    const { lat, lng } = req.body;
+    const date = new Date();
+    const datePart =
+      date.getFullYear().toString() +
+      String(date.getMonth() + 1).padStart(2, "0") +
+      String(date.getDate()).padStart(2, "0");
 
-    if (!req.file) {
-      return res.status(400).json({
-        error: "Pothole image is required"
-      });
-    }
+    const randomCode = crypto
+      .randomBytes(3)
+      .toString("hex")
+      .toUpperCase();
 
-    if (!lat || !lng) {
-      return res.status(400).json({
-        error: "Location is required"
-      });
-    }
-
-    const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    const randomCode = crypto.randomBytes(3).toString("hex").toUpperCase();
-    const reportId = `SC-${date}-${randomCode}`;
+    const reportId = `SC-${datePart}-${randomCode}`;
 
     const pothole = new Pothole({
       reportId,
-      image: req.file.path,
+      image: req.file ? req.file.path : null,
       location: {
-        lat: Number(lat),
-        lng: Number(lng)
-      }
+        lat: parseFloat(req.body.lat),
+        lng: parseFloat(req.body.lng)
+      },
+      severity: req.body.severity || "Medium",
+      status: "Reported"
     });
 
-    await pothole.save();
+    const savedPothole = await pothole.save();
 
     res.status(201).json({
       message: "Pothole reported successfully",
-      reportId: pothole.reportId,
-      status: pothole.status,
-      severity: pothole.severity,
-      location: pothole.location,
-      createdAt: pothole.createdAt
+      reportId: savedPothole.reportId,
+      pothole: savedPothole
     });
   } catch (err) {
-    console.error("Create pothole error:", err);
+    console.error("Upload error:", err);
     res.status(500).json({
       error: err.message
-    });
-  }
-});
-
-router.get("/status/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    let pothole = null;
-
-    if (id.startsWith("SC-")) {
-      pothole = await Pothole.findOne({ reportId: id });
-    } else if (mongoose.Types.ObjectId.isValid(id)) {
-      pothole = await Pothole.findById(id);
-    }
-
-    if (!pothole) {
-      return res.status(404).json({
-        error: "Report not found"
-      });
-    }
-
-    res.json({
-      reportId: pothole.reportId || pothole._id,
-      status: pothole.status,
-      severity: pothole.severity,
-      location: pothole.location,
-      createdAt: pothole.createdAt
-    });
-  } catch (err) {
-    console.error("Status check error:", err);
-    res.status(400).json({
-      error: "Invalid Report ID"
     });
   }
 });
@@ -101,6 +75,34 @@ router.get("/", async (req, res) => {
     });
 
     res.json(potholes);
+  } catch (err) {
+    res.status(500).json({
+      error: err.message
+    });
+  }
+});
+
+router.get("/status/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    let pothole;
+
+    if (/^SC-\d{8}-[A-Z0-9]+$/i.test(id)) {
+      pothole = await Pothole.findOne({
+        reportId: id.toUpperCase()
+      });
+    } else {
+      pothole = await Pothole.findById(id);
+    }
+
+    if (!pothole) {
+      return res.status(404).json({
+        error: "Report not found"
+      });
+    }
+
+    res.json(pothole);
   } catch (err) {
     res.status(500).json({
       error: err.message
@@ -124,7 +126,9 @@ router.put("/:id", auth, async (req, res) => {
       });
     }
 
-    const updateData = { status };
+    const updateData = {
+      status
+    };
 
     if (status === "Fixed") {
       updateData.fixedAt = new Date();
@@ -135,7 +139,9 @@ router.put("/:id", auth, async (req, res) => {
     const updated = await Pothole.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      {
+        new: true
+      }
     );
 
     if (!updated) {
