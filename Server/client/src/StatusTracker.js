@@ -22,7 +22,7 @@ function StatusTracker() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://localhost:5000/api/potholes/status/${id}`
+        `https://smart-city-solution-for-pothole-detection.onrender.com/api/potholes/status/${id}`
       );
       setReport(response.data);
     } catch (err) {

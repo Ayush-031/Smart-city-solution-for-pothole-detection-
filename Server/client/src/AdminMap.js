@@ -29,7 +29,7 @@ function AdminMap() {
   const fetchPotholes = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await axios.get( "http://localhost:5000/api/potholes", { headers: { Authorization: `Bearer ${token}`
+      const response = await axios.get( "https://smart-city-solution-for-pothole-detection.onrender.com/api/potholes", { headers: { Authorization: `Bearer ${token}`
           }
         }
       );

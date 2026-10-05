@@ -44,7 +44,7 @@ const [potholes, setPotholes] = useState([]);
   useEffect(() => {
     const fetchPotholes = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/potholes" );
+        const response = await axios.get("https://smart-city-solution-for-pothole-detection.onrender.com/api/potholes" );
         setPotholes(response.data);
       } catch (error) {
         console.log("Map error:", error);

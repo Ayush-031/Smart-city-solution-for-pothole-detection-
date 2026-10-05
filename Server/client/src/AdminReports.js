@@ -11,7 +11,7 @@ function AdminReports() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get( "http://localhost:5000/api/potholes", {
+      const response = await axios.get( "https://smart-city-solution-for-pothole-detection.onrender.com/api/potholes", {
           headers: {Authorization: `Bearer ${token}` } });
       setPotholes(response.data);
     } catch (err) {
@@ -33,7 +33,7 @@ function AdminReports() {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put( `http://localhost:5000/api/potholes/${id}`, { status },
+      await axios.put( `https://smart-city-solution-for-pothole-detection.onrender.com/api/potholes/${id}`, { status },
         {
           headers: {  Authorization: `Bearer ${token}` } });
 
@@ -56,7 +56,7 @@ function AdminReports() {
       return "";
     }
     const cleanPath = image.replace(/\\/g, "/");
-    return `http://localhost:5000/${cleanPath}`;
+    return `https://smart-city-solution-for-pothole-detection.onrender.com/${cleanPath}`;
   };
 
   const getStatusClass = (status) => {

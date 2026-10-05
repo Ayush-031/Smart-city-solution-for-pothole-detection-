@@ -48,7 +48,7 @@ function UserHome() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/potholes",
+        "https://smart-city-solution-for-pothole-detection.onrender.com/api/potholes",
         formData
       );
 
