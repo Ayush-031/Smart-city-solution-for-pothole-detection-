@@ -10,19 +10,12 @@ import L from "leaflet";
 import axios from "axios";
 import "leaflet/dist/leaflet.css";
 
-// Custom location icon
-const locationIcon = L.divIcon({
-  className: "custom-location-pin",
-  html: `
+const locationIcon = L.divIcon({ className: "custom-location-pin", html: `
     <div class="map-pin">
       <div class="map-pin-dot"></div>
     </div>
   `,
-  iconSize: [40, 50],
-  iconAnchor: [20, 50],
-  popupAnchor: [0, -50]
-});
-
+  iconSize: [40, 50],  iconAnchor: [20, 50], popupAnchor: [0, -50] });
 const potholeIcon = L.divIcon({
   className: "custom-marker",
   html: `
@@ -40,68 +33,42 @@ function MapController({ userLocation }) {
 
   useEffect(() => {
     if (userLocation?.lat && userLocation?.lng) {
-      map.flyTo(
-        [
-          Number(userLocation.lat),
-          Number(userLocation.lng)
-        ],
-        17,
-        {
-          duration: 1.5
-        }
-      );
+      map.flyTo( [Number(userLocation.lat), Number(userLocation.lng)], 17,{ duration: 1.5 });
     }
-  }, [userLocation, map]);
-
+  },[userLocation, map]);
   return null;
 }
 
 function MapView({ userLocation }) {
-  const [potholes, setPotholes] = useState([]);
-
+const [potholes, setPotholes] = useState([]);
   useEffect(() => {
     const fetchPotholes = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5000/api/potholes"
-        );
-
+        const response = await axios.get("http://localhost:5000/api/potholes" );
         setPotholes(response.data);
       } catch (error) {
         console.log("Map error:", error);
       }
     };
-
     fetchPotholes();
-
-    const interval = setInterval(
-      fetchPotholes,
-      3000
-    );
+    const interval = setInterval(fetchPotholes, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <MapContainer
-      center={[27.5, 77.7]}
-      zoom={10}
-      style={{
+    <MapContainer center={[27.5, 77.7]} zoom={10} style={{
         height: "400px",
         width: "100%"
       }}
     >
-
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      <MapController
-        userLocation={userLocation}
-      />
+      <MapController userLocation={userLocation} />
 
-      {/* USER LOCATION */}
       {userLocation?.lat && userLocation?.lng && (
         <Marker
           position={[
@@ -120,7 +87,6 @@ function MapView({ userLocation }) {
         </Marker>
       )}
 
-      {/* SAVED POTHOLES */}
       {potholes.map((pothole) => (
         <Marker
           key={pothole._id}
@@ -133,8 +99,7 @@ function MapView({ userLocation }) {
           <Popup>
             🚧 <b>Pothole Report</b>
             <br />
-            Report ID:{" "}
-            {pothole.reportId || pothole._id}
+            Report ID: {pothole.reportId || pothole._id}
             <br />
             Status: {pothole.status}
             <br />
@@ -142,7 +107,6 @@ function MapView({ userLocation }) {
           </Popup>
         </Marker>
       ))}
-
     </MapContainer>
   );
 }
