@@ -1,10 +1,10 @@
-# 🚧 Smart City Pothole Detection & Reporting System
+#  Smart City Pothole Detection & Reporting System
 
 A full-stack web application that allows citizens to report potholes using images and GPS location, while administrators can monitor, manage, and track pothole repairs through an interactive dashboard.
 
 ---
 
-## 📌 Project Overview
+##  Project Overview
 
 The **Smart City Pothole Detection & Reporting System** is designed to improve road safety by providing a digital platform for reporting and managing potholes.
 
@@ -27,32 +27,32 @@ Administrators can:
 
 ---
 
-## ✨ Features
+##  Features
 
-### 👤 User Features
+### User Features
 
-- 📷 Upload pothole images
-- 📍 Capture GPS coordinates using browser geolocation
-- 📝 Submit pothole reports
-- 🆔 Generate unique Report IDs
-- 🔎 Track report status
-- 🗺️ View pothole locations on an interactive map
+-  Upload pothole images
+-  Capture GPS coordinates using browser geolocation
+-  Submit pothole reports
+-  Generate unique Report IDs
+-  Track report status
+-  View pothole locations on an interactive map
 
-### 👨‍💼 Admin Features
+###  Admin Features
 
-- 🔐 Secure JWT-based admin authentication
-- 📊 Dashboard with pothole statistics
-- 🗺️ Live pothole map
-- 🔴 Reported potholes
-- 🟠 In-progress potholes
-- 🟢 Fixed potholes
-- 📸 View uploaded pothole images
-- 🔄 Update pothole status
-- 📍 View pothole coordinates
-- 🔄 Automatic dashboard data refresh
-- 📋 Manage all pothole reports
+-  Secure JWT-based admin authentication
+-  Dashboard with pothole statistics
+-  Live pothole map
+-  Reported potholes
+-  In-progress potholes
+-  Fixed potholes
+-  View uploaded pothole images
+-  Update pothole status
+-  View pothole coordinates
+-  Automatic dashboard data refresh
+-  Manage all pothole reports
 
-### 🗺️ Map Features
+###  Map Features
 
 Potholes are displayed using color-coded markers:
 
@@ -66,7 +66,7 @@ Fixed potholes are removed from the active map after 24 hours while their data r
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 
@@ -103,7 +103,7 @@ Fixed potholes are removed from the active map after 24 hours while their data r
 
 ---
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```text
 SmartCity Solution/
